@@ -1,0 +1,113 @@
+<Window x:Class="StudentManagementV2._1.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:StudentManagementV2._1.Views"
+        xmlns:viewModels="clr-namespace:StudentManagementV2._1.ViewModels"
+        xmlns:converters="clr-namespace:StudentManagementV2._1.Converters"
+        mc:Ignorable="d"
+        Title="Hệ thống quản lý học sinh" Height="700" Width="1000"
+        WindowStartupLocation="CenterScreen">
+    
+    <Window.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
+        <converters:BooleanToBackgroundConverter x:Key="BooleanToBackgroundConverter"/>
+        <converters:BooleanToForegroundConverter x:Key="BooleanToForegroundConverter"/>
+    </Window.Resources>
+    
+    <Window.DataContext>
+        <viewModels:MainViewModel/>
+    </Window.DataContext>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#1976D2" Padding="15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="Hệ thống quản lý học sinh" 
+                               Foreground="White" 
+                               FontSize="22" 
+                               FontWeight="Bold" 
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal" 
+                            Visibility="{Binding IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="{Binding CurrentUser.FullName}" 
+                               Foreground="White" 
+                               VerticalAlignment="Center"
+                               Margin="0,0,15,0"/>
+                    <TextBlock Text="{Binding CurrentUser.Role}" 
+                               Foreground="LightGray" 
+                               VerticalAlignment="Center"
+                               Margin="0,0,15,0"/>
+                    <Button Content="Đăng xuất" 
+                            Command="{Binding LogoutCommand}"
+                            Style="{StaticResource BaseButtonStyle}"
+                            Background="#F44336"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Row="1">
+            <!-- Login Screen - Hiển thị khi chưa đăng nhập -->
+            <local:LoginView x:Name="LoginScreenView" 
+                             Visibility="{Binding IsLoggedIn, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+            
+            <!-- Main Content after login - Hiển thị sau khi đăng nhập -->
+            <Grid Visibility="{Binding IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="220"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Navigation Menu -->
+                <Border Grid.Column="0" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="0,0,1,0">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding MenuItems}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding Title}"
+                                            Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            Margin="5,2"
+                                            Padding="10,8"
+                                            HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Left"
+                                            Background="{Binding IsSelected, Converter={StaticResource BooleanToBackgroundConverter}}"
+                                            Foreground="{Binding IsSelected, Converter={StaticResource BooleanToForegroundConverter}}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+                
+                <!-- Content Area -->
+                <Border Grid.Column="1" Padding="15">
+                    <ContentControl Content="{Binding CurrentView}"/>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="#E0E0E0" Padding="10">
+            <TextBlock Text="© 2024 Hệ thống quản lý học sinh v2.1" 
+                       HorizontalAlignment="Center" 
+                       Foreground="#757575"/>
+        </Border>
+    </Grid>
+</Window>
